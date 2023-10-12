@@ -29,11 +29,6 @@ $ python script_name.py [--test_run] [--output OUTPUT_DIR] [--spider SPIDER_DIR]
 
 This Streamlit application provides an interactive chat experience for users to interact with X-Co company's data. Leveraging the GPT model, the application delivers accurate and relevant answers by referencing indexed X-Co documents.
 
-## Overview
-
-- **Author**: Al Jepps
-- **Date**: 12th Oct 2023
-
 ### Features
 
 - **Real-time Chat Interface**: Users can communicate in real time and receive instant responses.

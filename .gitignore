@@ -1,2 +1,3 @@
 scraped/*
 .streamlit/secrets.toml
+*.old
