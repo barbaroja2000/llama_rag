@@ -53,6 +53,6 @@ streamlit run llama.py
 
 3. **Configuration**:
 
-* OPENAI_API_KEY: Required to authenticate and interact with the GPT model. Ensure you've set this in the st.secrets or as an environment variable.
+* OPENAI_API_KEY: Add to ``.streamlit/secrets.toml` as OPENAI_API_KEY=""
 * MODEL: Specifies which GPT model version to use. Default is gpt-3.5-turbo-16k-0613.
 * SYSTEM_PROMPT: Guides the GPT model on the context and scope of expected responses.
