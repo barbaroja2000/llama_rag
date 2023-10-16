@@ -1,5 +1,5 @@
 """
-Chat with X-Co - Streamlit App
+Chat with X-Co - Streamlit App with direct Apify integration
 
 This Streamlit application enables users to chat with company Data.
 Users can ask questions related to X-Co, and the application provides relevant answers 
@@ -18,12 +18,16 @@ Version: 0.1
 # Standard Library Imports
 import time
 import os
+import subprocess
+from types import SimpleNamespace
 
 # External Imports
 import openai
 import streamlit as st
-from llama_index import VectorStoreIndex, ServiceContext, SimpleDirectoryReader
 from llama_index.llms import OpenAI
+from llama_index import download_loader, set_global_handler, load_index_from_storage, StorageContext
+
+
 from dotenv import load_dotenv
 
 
@@ -50,6 +54,7 @@ assert isinstance(COMPANY, str), f"COMPANY '{COMPANY}' is not a valid string"
 
 print("All tests passed!")
 
+
 PAGE_TITLE = f"Chat with {GPT_NAME}"
 SYSTEM_PROMPT=f"""
 You are the digital assistant for {COMPANY}'s website. 
@@ -59,8 +64,8 @@ If you're unsure of an answer, please indicate that you don't have that informat
 """
 
 LLM=OpenAI(model=MODEL, temperature=0.0, system_prompt=SYSTEM_PROMPT)
-INPUT_DIR="scraped/{some-dir}"
 
+set_global_handler("simple")
 
 # Streamlit App Configuration
 st.set_page_config(page_title=PAGE_TITLE, page_icon="🗿", layout="centered", initial_sidebar_state="auto", menu_items=None)
@@ -69,16 +74,18 @@ st.title(f"Chat with the {GPT_NAME} 🗿")
 # Initialize the chat messages history     
 if "messages" not in st.session_state.keys(): 
     st.session_state.messages = [
-        {"role": "assistant", "content": "Ask me a question about X-Co"}
+        {"role": "assistant", "content": f"Ask me a question about {COMPANY}"}
     ]
 
 @st.cache_resource(show_spinner=False)
 def load_data():
-    with st.spinner(text="Loading Docs. This may take 1-2 minutes.."):
-        reader = SimpleDirectoryReader(input_dir=INPUT_DIR, recursive=True)
-        docs = reader.load_data()
-        service_context = ServiceContext.from_defaults(llm=LLM)
-        index = VectorStoreIndex.from_documents(docs, service_context=service_context)
+    with st.spinner(text="Loading Docs..."):
+        # to load index later, make sure you setup the storage context
+        # this will loaded the persisted stores from persist_dir
+        storage_context = StorageContext.from_defaults(
+            persist_dir="./vector_index"
+        )
+        index = load_index_from_storage(storage_context)
         return index
 
 index = load_data()
@@ -103,7 +110,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
 
         with st.spinner("Thinking..."):
-            total_response = ""
 
             response = st.session_state.chat_engine.stream_chat(prompt)
             for token in response.response_gen:
